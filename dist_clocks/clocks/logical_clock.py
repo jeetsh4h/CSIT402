@@ -2,7 +2,7 @@ import random
 from time import sleep
 
 from .process import Process
-from .log_utils import setup_logging
+from ..log import setup_logging
 
 
 logger = setup_logging()
@@ -11,8 +11,7 @@ logger = setup_logging()
 # process implemented with a logical clock
 class LogicalProcess(Process):
     def __init__(self, process_id, num_processes, num_events=10):
-        super().__init__(process_id, num_events)
-        self.num_processes = num_processes  # number of processes in the pool
+        super().__init__(process_id, num_processes, num_events)
         self.clock: int = 0
 
     def run(self):

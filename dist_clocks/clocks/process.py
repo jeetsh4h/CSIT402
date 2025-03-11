@@ -3,7 +3,7 @@ import socket
 import multiprocessing as mp
 from abc import ABC, abstractmethod
 
-from .log_utils import setup_logging
+from ..log import setup_logging
 
 
 logger = setup_logging()
@@ -13,9 +13,10 @@ BASE_PORT = 6000  # base port to compute unique ports per process
 
 
 class Process(ABC):
-    def __init__(self, process_id, num_events=10):
+    def __init__(self, process_id, num_processes, num_events=10):
         self.process_id = process_id
         self.num_events = num_events
+        self.num_processes = num_processes
 
         self.port = BASE_PORT + self.process_id
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
