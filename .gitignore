@@ -1,1 +1,8 @@
+# No copyright issues
 *.pdf
+
+# Python artifacts
+**/__pycache__/
+
+# IDE artifacts
+.vscode/
