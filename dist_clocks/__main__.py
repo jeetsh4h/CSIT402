@@ -1,6 +1,10 @@
 import argparse
 
+from .log_utils import setup_logging
 from .logical_process import LogicalProcess
+
+
+logger = setup_logging()
 
 
 def main():
@@ -31,6 +35,9 @@ def main():
 
     match args.command:
         case "logical":
+            logger.info(
+                f"Starting logical clock simulation with {args.n_processes} processes & {args.n_events} events per process."
+            )
             processes = []
             for i in range(args.n_processes):
                 process = LogicalProcess(
@@ -39,12 +46,19 @@ def main():
                     num_events=args.n_events,
                 )
                 processes.append(process)
+                logger.debug(f"LogicalProcess {i} initialized.")
 
             for process in processes:
                 process.start()
+                logger.debug(f"LogicalProcess {process.process_id} started.")
 
+            # TODO: seems wrong
             for process in processes:
                 process.join()
+                logger.debug(f"LogicalProcess {process.process_id} finished.")
+
+            logger.info("Logical clock simulation finished.\n")
+
         case _:
             parser.print_help()
 
