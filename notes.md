@@ -348,3 +348,66 @@ P_j::
 
 **Induction is usually the prinicipal technique to verify distributed algorithms.**
 
+We use invariants to validate clock algorithms, for example, is by defining an invariant $B$ (usually the definition of the clock, _see above_) and proving that the invariant is maintained regardless of any events that occur within a system.
+
+A chain in $(S, \rightarrow)$ is a sequence of states $s_0, s_1, ..., s_n$ such that $s_i \prec_{im} s_{i+1}$ or $s_i \leadsto s_{i+1}$. For any pair of states $s, t \text{where} (s \rightarrow t)$, we define a maximum length fucntion $ml(s, t)$ as the length of the longest between $s$ and $t$. Therefore, if $s = t$ then $ml(s, t) = 0$, and if $s \nrightarrow t$ then $ml(s, t) = -1$.  
+Use $ml(Init, t)$ to denote the length of the longest chain from the initial state to $t$.
+
+Therefore, this is true from the defintion of $ml$:
+$$ml(s, t) > 0 \Leftrightarrow (\exists u : ml(s, u) = ml(s, t) - 1 \wedge ml(u, t) = 1)$$
+
+The above essentially stating that if a certain state immediately preceds another state, then the length of the longest chain between them is 1.
+
+Defining the $\xrightarrow{k}$ relation 
+$$\text{for k > 0; } s \xrightarrow{k} t \stackrel{def}{=} ml(s, t) = k$$
+
+Having a k-happened before relation makes it easy to verigy and prove predicates via induction, as we can just show that it is true for all $k > 0$.
+
+> Looking at the above definition, it is easy to see that $S \xrightarrow{1} t$ is the base case. This is easy to prove by looking at the algorithm itself. 
+
+**Proof of the Vector CLock**
+
+Let us prove the refined vector clock algorithm as stated above, we can do that by splitting it into two claims.
+
+$$s.p \neq t.p \wedge s \rightarrow t \Rightarrow s.v < t.v$$  
+$$s.p \neq t.p \wedge s.v < t.v \Rightarrow s \rightarrow t$$
+
+> We can split it, due to the biconditional.
+
+Let us prove the lemma $ s\rightarrow t \Rightarrow s.v \leq t.v$:
+
+It is sufficient to show that $\forall k > 0: s \xrightarrow{k} t \Rightarrow s.v \leq t.v$  
+We use induction on $k$.
+
+$$
+\begin{aligned}
+&\text{Base Case: } (k = 1) \\
+&\\
+&\quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad s \xrightarrow{1} t \\
+&\{ \text{definition of } ml \} \quad s \prec_{im} t \vee s \rightarrow t \\
+&\{ \text{expand } s \prec_{im} t \text{ and } s \rightarrow t \} \quad (s, \text{internal}, t) \vee (s, \text{send}, t) \vee (\exists u: (s, \text{rcv}(u), t)) \\
+&\vee (\exists u: (u, \text{rcv}(s), t)) \\
+&\{ \text{send, rcv, and internal rules} \} \quad (s.v = t.v) \vee (s.v < t.v) \vee (s.v \le t.v) \\
+&\vee (s.v \le t.v) \\
+&\{ \text{simplify} \} \quad s.v \le t.v \\
+&\\
+&\text{Induction: } (k > 1) \\
+&\\
+&\quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad s \xrightarrow{k} t \wedge (k > 1) \\
+&\{ \text{definition of } ml \} \quad (\exists u: s \xrightarrow{k-1} u \wedge u \xrightarrow{1} t) \\
+&\{ \text{induction hypothesis} \} \quad (\exists u: s.v \le u.v \wedge u.v \le t.v) \\
+&\{ \text{simplify} \} \quad s.v \le t.v
+\end{aligned}
+$$
+
+To prove the second lemma, we are introduciing another term and fucntion $rank$. We define this:
+
+$$rank(t) = ml(Init, t)$$
+
+> Refer to the proof of the lemma on page 44 (It takes too long to turn it into markdown).
+
+The first induction proof was for $s.v \leq t.v$  
+There is a refinement for the proof that also drops the inequality. It is in the textbook. Here it is verbatim:
+
+>  From above, we get that $s.v \leq t.v$. Furthermore, $s \rightarrow t$ implies that $t \nrightarrow s$. From $t \nrightarrow s$, $s.p \neq t.p$ and Lemma 4.4, we get that $s.v[t.p] < t.v[t.p]$. Combining this with $s.v \leq t.v$, we get the desired result.
+
