@@ -33,11 +33,15 @@ class Process(ABC):
             s.sendall(data)
 
     def receive_message(self):
-        conn, _ = self.server.accept()
-        with conn:
-            data = conn.recv(4096)
-            msg = json.loads(data.decode("utf-8"))
-        return msg
+        self.server.settimeout(5.0)  # add timeout (in seconds)
+        try:
+            conn, _ = self.server.accept()
+            with conn:
+                data = conn.recv(4096)
+                msg = json.loads(data.decode("utf-8"))
+            return msg
+        except socket.timeout:
+            return None
 
     def start(self):
         self.os_process.start()

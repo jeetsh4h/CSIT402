@@ -1,4 +1,5 @@
 import random
+from time import sleep
 
 from .process import Process
 
@@ -13,6 +14,8 @@ class LogicalProcess(Process):
     def run(self):
         for _ in range(self.num_events):
             event = random.choice(["INTERNAL", "SEND", "RECV"])
+
+            sleep(random.uniform(0.0, 1.5))
 
             match event:
                 case "SEND":
@@ -42,7 +45,13 @@ class LogicalProcess(Process):
                 case "RECV":
                     prev_clock = self.clock
 
-                    msg: dict = super().receive_message()
+                    msg: dict | None = super().receive_message()
+                    if msg is None:
+                        self.clock += 1
+                        print(
+                            f"PID: {self.process_id}; INTERNAL: RECV timed out; CLK: {prev_clock} -> {self.clock}"
+                        )
+                        continue
 
                     self.clock = max(self.clock, msg["clock"]) + 1
 
